@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     networks:
       - app-network
     depends_on:
@@ -13,6 +15,8 @@ services:
 
   database:
     image: postgres:15-alpine
+    env_file:
+      - .env 
     volumes:
       - db-data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql

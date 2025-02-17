@@ -12,6 +12,7 @@ jobs:
   build:
     name: "Build and Push"
     runs-on: ${{ matrix.os }}
+    environment: deploy
     outputs:
       docker_tag: ${{ steps.generate_tag.outputs.sha }}
 
@@ -49,13 +50,14 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Docker Image
-        run: docker build -t samaraferreira/docker-atividade:${{ steps.generate_tag.outputs.sha }} .
+        run: docker build -t samarafer/docker-atividade:${{ steps.generate_tag.outputs.sha }} .
 
       - name: Push Docker Image to DockerHub
-        run: docker push samaraferreira/docker-atividade:${{ steps.generate_tag.outputs.sha }}
+        run: docker push samarafer/docker-atividade:${{ steps.generate_tag.outputs.sha }}
 
   deploy:
     name: Deploy on Digital Ocean
+    environment: deploy
     runs-on: ubuntu-latest
     needs: build
 
@@ -63,28 +65,31 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PASSWORD }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
       - name: Copy docker-compose file via ssh
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          password: ${{ secrets.PASSWORD }}
-          source: "./docker-compose.yaml"
+          key: ${{ secrets.PASSWORD }}
+          source: "./docker-compose.yml"
           target: "~/"
 
       - name: Deploy on Digital Ocean via ssh
-        uses: appleboy/ssh-action@v0.1.3
+        uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.PASSWORD }}
           script: |
             # Extract the tag on job build
             TAG=${{ needs.build.outputs.docker_tag }}
-            # Create env file
-            [ -e .env ] && rm .env
-            touch .env
-            echo  "DOCKER_IMAGE_TAG=$TAG" > .env
             # Login Docker
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
             #Stop Containers

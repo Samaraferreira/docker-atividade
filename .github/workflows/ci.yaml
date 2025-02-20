@@ -65,47 +65,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Setup SSH Key
+      - name: Install DigitalOcean CLI
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.PASSWORD }}" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-
-      - name: Copy docker-compose file via ssh
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.PASSWORD }}
-          source: "./docker-compose.yml"
-          target: "~/"
-
-      - name: Deploy on Digital Ocean via ssh
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.PASSWORD }}
-          script: |
-            # Extract the tag on job build
-            TAG=${{ needs.build.outputs.docker_tag }}
-            # Login Docker
-            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-            #Stop Containers
-            CONTAINERS=$(docker ps -q)
-            if [ -n "$CONTAINERS" ]; then
-              docker stop $CONTAINERS
-            else
-              echo " No running containers"
-            fi
-            #Remove Old Containers
-            CONTAINERS=$(docker ps -a -q)
-            if [ -n "$CONTAINERS" ]; then
-              docker rm $CONTAINERS
-            else
-              echo " No containers to remove"
-            fi
-            #Run a new container from a new image
-            docker-compose up -d --build
-
+          curl -sL https://github.com/digitalocean/doctl/releases/download/v1.90.0/doctl-1.90.0-linux-amd64.tar.gz | tar -xz
+          sudo mv doctl /usr/local/bin

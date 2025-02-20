@@ -69,3 +69,5 @@ jobs:
         run: |
           curl -sL https://github.com/digitalocean/doctl/releases/download/v1.90.0/doctl-1.90.0-linux-amd64.tar.gz | tar -xz
           sudo mv doctl /usr/local/bin
+      - name: Authenticate with DigitalOcean
+        run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_TOKEN }}

@@ -69,6 +69,7 @@ jobs:
         run: |
           curl -sL https://github.com/digitalocean/doctl/releases/download/v1.90.0/doctl-1.90.0-linux-amd64.tar.gz | tar -xz
           sudo mv doctl /usr/local/bin
+
       - name: Authenticate with DigitalOcean
         run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_TOKEN }}
       
@@ -82,6 +83,8 @@ jobs:
 
           # Add the DigitalOcean Droplet to known_hosts
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+          cat ~/.ssh/known_hosts
 
           # Execute commands on the DigitalOcean Droplet
           doctl compute ssh ${{ secrets.DROPLET_NAME }} \

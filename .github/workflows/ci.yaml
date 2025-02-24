@@ -87,5 +87,6 @@ jobs:
                 echo 'DOCKER_IMAGE_TAG=${{ env.commit_hash }}' >> .env
               fi
               chmod 644 database/init.sql;
-              docker-compose -f docker-compose.yml up -d --build;
+              docker-compose down -v;
+              docker-compose -f docker-compose.yml up -d --build --force-recreate;
             "

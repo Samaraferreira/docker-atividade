@@ -73,7 +73,13 @@ jobs:
       - name: Authenticate with DigitalOcean
         run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_TOKEN }}    
       
-      - name: Deploy Docker Compose App
+      - name: Copy docker-compose file via ssh
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          source: "./docker-compose.yaml"
+          target: "~/"
+      
+      - name: Deploy
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
@@ -85,8 +91,6 @@ jobs:
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
           ssh -i private_key.pem root@${{ secrets.HOST }} "echo SSH Connection Successful"
-
-          cat ~/.ssh/known_hosts
 
           # Execute commands on the DigitalOcean Droplet
           doctl compute ssh ${{ secrets.DROPLET_NAME }} \

@@ -13,8 +13,6 @@ jobs:
     name: "Build and Push"
     runs-on: ${{ matrix.os }}
     environment: deploy
-    outputs:
-      docker_tag: ${{ steps.generate_tag.outputs.sha }}
 
     strategy:
       matrix:
@@ -48,12 +46,16 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Get short commit hash
+        id: get_commit_hash
+        run: echo "commit_hash=$(git rev-parse --short=7 HEAD)" >> $GITHUB_ENV
 
       - name: Build Docker Image
-        run: docker build -t samarafer/docker-atividade:${{ steps.generate_tag.outputs.sha }} .
+        run: docker build -t samarafer/docker-atividade:${{ env.commit_hash }} .
 
       - name: Push Docker Image to DockerHub
-        run: docker push samarafer/docker-atividade:${{ steps.generate_tag.outputs.sha }}
+        run: docker push samarafer/docker-atividade:${{ env.commit_hash }}
 
   deploy:
     name: Deploy on Digital Ocean
@@ -86,12 +88,15 @@ jobs:
       
       - name: Deploy
         run: |
-          TAG=${{ steps.generate_tag.outputs.sha }}
-          echo "Using Docker Image Tag: $TAG"
+          ssh -i private_key.pem root@${{ secrets.HOST }}
 
-          ssh -i private_key.pem root@${{ secrets.HOST }} << EOF
-            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }};
-            docker pull samarafer/docker-atividade:$TAG;
-            echo 'DOCKER_IMAGE_TAG=$TAG' >> .env;
-            docker-compose -f /root/docker-compose.yml up -d --build;
-          EOF
+          doctl compute ssh ${{ secrets.DROPLET_NAME }} \
+            --access-token ${{ secrets.DIGITALOCEAN_TOKEN }} \
+            --ssh-user root \
+            --ssh-key-path ./private_key.pem \
+            --ssh-command "
+              docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }};
+              docker pull samarafer/docker-atividade:${{ env.commit_hash }};
+              echo 'DOCKER_IMAGE_TAG=${{ env.commit_hash }}' >> .env;
+              docker-compose -f docker-compose.yml up -d --build;
+            "

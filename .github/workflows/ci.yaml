@@ -72,6 +72,9 @@ jobs:
 
       - name: Authenticate with DigitalOcean
         run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_TOKEN }}
+
+      - name: Debug SSH Connection
+        run: ssh -i private_key.pem root@${{ secrets.HOST }} "echo SSH Connection Successful"      
       
       - name: Deploy Docker Compose App
         run: |

@@ -2,6 +2,7 @@ version: '3.8'
 services:
   app:
     image: samarafer/docker-atividade:${DOCKER_IMAGE_TAG}
+    env_file: .env
     ports:
       - "3000:3000"
     networks:
@@ -11,6 +12,7 @@ services:
 
   database:
     image: postgres:15-alpine
+    env_file: .env
     volumes:
       - db-data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql

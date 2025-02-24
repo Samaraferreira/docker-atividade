@@ -3,7 +3,6 @@ const bodyParser = require('body-parser');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
 const cors = require('cors');
-const swaggerDocument = require('../swagger.json');
 const recordsRouter = require('./routes/records');
 require('dotenv').config();
 

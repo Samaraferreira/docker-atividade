@@ -9,7 +9,6 @@ RUN npm install --only=production
 
 # Copy application source
 COPY ./src ./src
-COPY ./swagger.json ./
 
 # RUN npm run build
 

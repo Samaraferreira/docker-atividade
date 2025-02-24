@@ -9,6 +9,7 @@ RUN npm install --only=production
 
 # Copy application source
 COPY ./src ./src
+COPY ./database ./database
 
 # RUN npm run build
 

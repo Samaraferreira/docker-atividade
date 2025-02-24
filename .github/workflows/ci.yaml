@@ -32,8 +32,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-#      - name: Running Tests
-#        run: npm run test
+      - name: Running Tests
+        run: npm test
 
       - name: Login into the Container Registry
         uses: docker/login-action@v3

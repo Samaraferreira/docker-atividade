@@ -86,9 +86,12 @@ jobs:
       
       - name: Deploy
         run: |
-          ssh -i private_key.pem root@${{ secrets.HOST }} << 'EOF'
+          TAG=${{ steps.generate_tag.outputs.sha }}
+          echo "Using Docker Image Tag: $TAG"
+
+          ssh -i private_key.pem root@${{ secrets.HOST }} << EOF
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }};
-            docker pull samarafer/docker-atividade:${{ steps.generate_tag.outputs.sha }};
-            echo 'DOCKER_IMAGE_TAG=${{ steps.generate_tag.outputs.sha }}' >> .env;
+            docker pull samarafer/docker-atividade:$TAG;
+            echo 'DOCKER_IMAGE_TAG=$TAG' >> .env;
             docker-compose -f /root/docker-compose.yml up -d --build;
           EOF

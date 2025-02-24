@@ -1,9 +1,7 @@
 version: '3.8'
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: samarafer/docker-atividade:${DOCKER_IMAGE_TAG}
     ports:
       - "3000:3000"
     networks:

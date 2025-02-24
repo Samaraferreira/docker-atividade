@@ -1,8 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const swaggerUi = require('swagger-ui-express');
-const swaggerJSDoc = require('swagger-jsdoc');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+const path = require('path');
 const recordsRouter = require('./routes/records');
 require('dotenv').config();
 
@@ -10,37 +11,26 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-
-// Middleware
 app.use(bodyParser.json());
 
 // Swagger Configuration
-const swaggerOptions = {
+const options = {
   definition: {
-    openapi: "3.0.0",
+    openapi: '3.0.0',
     info: {
-      title: "Node.js API",
-      version: "1.0.0",
-      description: "API documentation for the Node.js application"
+      title: 'Records API',
+      version: '1.0.0',
+      description: 'A simple API for managing records',
     },
-    servers: [
-      {
-        url: process.env.BASE_URL || `http://localhost:${PORT}`,
-        description: "Development server"
-      }
-    ]
   },
-  apis: ['./routes/*.js']
+  apis: [path.join(__dirname, './routes/records.js')],
 };
 
-// Initialize Swagger JSDoc
-const swaggerSpec = swaggerJSDoc(swaggerOptions);
-
-// Swagger UI Route
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+const specs = swaggerJsdoc(options);
 
 // Routes
 app.use('/records', recordsRouter);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Root Route
 app.get('/', (req, res) => {
@@ -49,6 +39,6 @@ app.get('/', (req, res) => {
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Server running`);
+  console.log(`Server running on port ${PORT}`);
   console.log(`Swagger documentation available at /api-docs`);
 });

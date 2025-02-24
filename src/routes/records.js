@@ -5,13 +5,26 @@ const router = express.Router();
 
 /**
  * @swagger
- * /records:
- *   get:
- *     summary: "Get all records"
- *     description: "Returns a list of records"
- *     responses:
- *       200:
- *         description: "A list of records"
+ * paths:
+ *   /records:
+ *     get:
+ *       summary: Retrieve a list of records.
+ *       responses:
+ *         200:
+ *           description: A list of records.
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     name:
+ *                       type: string
+ *                     description:
+ *                       type: string
  */
 router.get('/', async (req, res) => {
   try {
@@ -25,12 +38,35 @@ router.get('/', async (req, res) => {
 
 /**
  * @swagger
- * /records:
- *   post:
- *     summary: "Create a record"
- *     responses:
- *       200:
- *         description: "record"
+ * paths:
+ *   /records:
+ *     post:
+ *       summary: Add a new record.
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *       responses:
+ *         201:
+ *           description: The created record.
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   name:
+ *                     type: string
+ *                   description:
+ *                     type: string
  */
 router.post('/', async (req, res) => {
   const { name, description } = req.body;

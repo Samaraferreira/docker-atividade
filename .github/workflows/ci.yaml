@@ -74,6 +74,14 @@ jobs:
         run: |
           ssh -i private_key.pem root@${{ secrets.HOST }}
 
+          # Ensure the .env file exists
+          if [ -f .env ]; then
+            # Replace the DOCKER_IMAGE_TAG without removing other data
+            sed -i '' 's/^DOCKER_IMAGE_TAG=.*/DOCKER_IMAGE_TAG=${{ env.commit_hash }}/' .env
+          else
+            echo 'DOCKER_IMAGE_TAG=${{ env.commit_hash }}' >> .env;
+          fi
+
           doctl compute ssh ${{ secrets.DROPLET_NAME }} \
             --access-token ${{ secrets.DIGITALOCEAN_TOKEN }} \
             --ssh-user root \
@@ -81,6 +89,5 @@ jobs:
             --ssh-command "
               docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }};
               docker pull samarafer/docker-atividade:${{ env.commit_hash }};
-              echo 'DOCKER_IMAGE_TAG=${{ env.commit_hash }}' >> .env;
               docker-compose -f docker-compose.yml up -d --build;
             "

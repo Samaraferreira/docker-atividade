@@ -3,7 +3,16 @@ const db = require('../database');
 
 const router = express.Router();
 
-// Get all records
+/**
+ * @swagger
+ * /records:
+ *   get:
+ *     summary: "Get all records"
+ *     description: "Returns a list of records"
+ *     responses:
+ *       200:
+ *         description: "A list of records"
+ */
 router.get('/', async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM records');
@@ -14,7 +23,15 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Add a new record
+/**
+ * @swagger
+ * /records:
+ *   post:
+ *     summary: "Create a record"
+ *     responses:
+ *       200:
+ *         description: "record"
+ */
 router.post('/', async (req, res) => {
   const { name, description } = req.body;
   try {

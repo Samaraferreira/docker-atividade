@@ -15,17 +15,6 @@ app.use(cors());
 // Middleware
 app.use(bodyParser.json());
 
-// Swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
-// Routes
-app.use('/records', recordsRouter);
-
-// Root Route
-app.get('/', (req, res) => {
-  res.send('Welcome to the Node.js API! Visit /api-docs for API documentation.');
-});
-
 // Swagger Configuration
 const swaggerOptions = {
   definition: {
@@ -42,8 +31,7 @@ const swaggerOptions = {
       }
     ]
   },
-  // Path to the API docs
-  apis: ['./routes/records.js']
+  apis: ['./routes/*.js']
 };
 
 // Initialize Swagger JSDoc
@@ -51,6 +39,14 @@ const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
 // Swagger UI Route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Routes
+app.use('/records', recordsRouter);
+
+// Root Route
+app.get('/', (req, res) => {
+  res.send('Welcome to the Node.js API! Visit /api-docs for API documentation.');
+});
 
 // Start Server
 app.listen(PORT, () => {
